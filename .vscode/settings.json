@@ -1,0 +1,17 @@
+{
+	"editor.wordWrap": "on",
+	"eslint.alwaysShowStatus": true,
+	"eslint.format.enable": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit",
+		"source.fixAll.stylelint": "explicit"
+	},
+	"eslint.workingDirectories": [
+		"./src",
+	],
+	"editor.formatOnSave": true,
+	"stylelint.enable": true,
+	"[yaml]": {
+		"editor.wordWrap": "off"
+	}
+}

@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Breakbeat Library - Legendary Drum Samples</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --accent: #fd79a8;
+            --success: #00b894;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--dark) 0%, #16213e 100%);
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+       
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 0.5rem 1rem;
+            margin-left: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus-within {
+            background-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--light);
+            padding: 0.5rem;
+            width: 200px;
+            outline: none;
+        }
+
+        .search-bar i {
+            color: var(--light);
+            cursor: pointer;
+        }
+
+        .hero {
+            height: 70vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(transparent, var(--dark));
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+
+        .hero h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .breakbeats {
+            padding: 4rem 0;
+            background-color: var(--dark);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            position: relative;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .filter-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .beat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+     
+
+        .beat-img {
+            height: 200px;
+            background-color: #0f172a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .beat-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .beat-card:hover .beat-img img {
+            transform: scale(1.1);
+        }
+
+        .beat-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.8));
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 1rem;
+        }
+
+        .beat-category {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .beat-info {
+            padding: 1.5rem;
+        }
+
+        .beat-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .beat-meta {
+            display: flex;
+            justify-content: space-between;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .beat-stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .beat-stats span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .play-btn {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .beat-card:hover .play-btn {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .play-btn:hover {
+            background-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .play-btn i {
+            color: white;
+            font-size: 1rem;
+        }
+
+        .audio-player-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(90deg, var(--dark), #16213e);
+            padding: 1rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 100;
+        }
+
+        .audio-player {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .track-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 300px;
+        }
+
+        .track-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .track-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .track-details h4 {
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-details p {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .player-controls {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .controls button:hover {
+            color: var(--primary);
+        }
+
+        .controls .play-pause-btn {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls .play-pause-btn:hover {
+            transform: scale(1.1);
+            background-color: var(--accent);
+        }
+
+        .progress-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .time {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 40px;
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            border-radius: 5px;
+            width: 0%;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 150px;
+        }
+
+        .volume-control i {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+
+        .volume-slider {
+            flex-grow: 1;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .volume-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .featured-breakbeats {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, var(--dark) 0%, #16213e 100%);
+        }
+
+        .featured-slider {
+            display: flex;
+            overflow-x: auto;
+            gap: 1.5rem;
+            padding: 1rem 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .featured-slider::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .featured-slider::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .featured-slider::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+
+        .featured-beat {
+            min-width: 300px;
+            scroll-snap-align: start;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .featured-beat:hover {
+            transform: translateY(-5px);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .featured-img {
+            height: 180px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .featured-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .featured-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        }
+
+        .featured-overlay h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .featured-tag {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .featured-info {
+            padding: 1.2rem;
+        }
+
+        .featured-info p {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .featured-stats {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stats-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .stats-item i {
+            color: var(--primary);
+        }
+
+        .contributors {
+            padding: 4rem 0;
+            text-align: center;
+            background-color: var(--dark);
+        }
+
+        .contributor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .contributor-card {
+            background-color: #16213e;
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .contributor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .contributor-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--primary);
+        }
+
+        .contributor-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .contributor-info h4 {
+            margin-bottom: 0.3rem;
+        }
+
+        .contributor-info p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .newsletter {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .newsletter h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .newsletter p {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .newsletter-form {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 30px 0 0 30px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .newsletter-form button {
+            background-color: var(--dark);
+            color: white;
+            border: none;
+            padding: 0 2rem;
+            border-radius: 0 30px 30px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .newsletter-form button:hover {
+            background-color: black;
+        }
+
+        footer {
+            background-color: #0f172a;
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .footer-logo h2 {
+            font-size: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .footer-about p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-links h4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 992px) {
+            .beat-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h2 {
+                font-size: 2.5rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-bar {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .audio-player {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .track-info {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .progress-container {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            nav ul {
+                gap: 0.8rem;
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .featured-beat {
+                min-width: 250px;
+            }
+
+            .newsletter-form {
+                flex-direction: column;
+            }
+
+            .newsletter-form input {
+                border-radius: 30px;
+                margin-bottom: 0.5rem;
+            }
+
+            .newsletter-form button {
+                border-radius: 30px;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Discover Legendary Drum Breaks</h2>
+            <p>Explore the most sampled breakbeats in music history, from classic funk and soul to the foundation of hip-hop, jungle, and electronic music. Our library preserves these iconic rhythms that shaped generations of music.</p>
+            <a href="#" class="btn">Start Exploring</a>
+        </div>
+    </section>
+
+    <section class="breakbeats">
+        <div class="container">
+            <div class="section-header">
+                <h2>The Breakbeat Archives</h2>
+                <div class="filter-controls">
+                    <button class="filter-btn active">All</button>
+                    <button class="filter-btn">Funk</button>
+                    <button class="filter-btn">Soul</button>
+                    <button class="filter-btn">Jazz</button>
+                    <button class="filter-btn">Rock</button>
+                </div>
+            </div>
+
+            <div class="beat-grid">
+                <!-- Beat Card 1 -->
+                <div class="beat-card" data-category="funk">
+                    <div class="beat-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="The Winstons">
+                        <div class="beat-overlay">
+                            <span class="beat-category">Funk</span>
+                        </div>
+                    </div>
+                    <div class="beat-info">
+                        <h3>"Amen, Brother" - The Winstons</h3>
+                        <div class="beat-meta">
+                            <span>1970</span>
+                            <div class="beat-stats">
+                                <span><i class="fas fa-music"></i> 12.5k</span>
+                                <span><i class="fas fa-heart"></i> 8.7k</span>
+                            </div>
+                        </div>
+                        <p>The most sampled breakbeat of all time, foundational to drum and bass and hip-hop.</p>
+                    </div>
+                    <div class="play-btn" data-title="Amen, Brother - The Winstons" data-cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+
+                <!-- Beat Card 2 -->
+                <div class="beat-card" data-category="funk">
+                    <div class="beat-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="James Brown">
+                        <div class="beat-overlay">
+                            <span class="beat-category">Funk</span>
+                        </div>
+                    </div>
+                    <div class="beat-info">
+                        <h3>"Funky Drummer" - James Brown</h3>
+                        <div class="beat-meta">
+                            <span>1970</span>
+                            <div class="beat-stats">
+                                <span><i class="fas fa-music"></i> 10.2k</span>
+                                <span><i class="fas fa-heart"></i> 7.1k</span>
+                            </div>
+                        </div>
+                        <p>Clyde Stubblefield's legendary groove, sampled in countless hip-hop tracks.</p>
+                    </div>
+                    <div class="play-btn" data-title="Funky Drummer - James Brown" data-cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+
+                <!-- Beat Card 3 -->
+                <div class="beat-card" data-category="soul">
+                    <div class="beat-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="The Honey Drippers">
+                        <div class="beat-overlay">
+                            <span class="beat-category">Soul</span>
+                        </div>
+                    </div>
+                    <div class="beat-info">
+                        <h3>"Impeach the President" - The Honey Drippers</h3>
+                        <div class="beat-meta">
+                            <span>1973</span>
+                            <div class="beat-stats">
+                                <span><i class="fas fa-music"></i> 8.9k</span>
+                                <span><i class="fas fa-heart"></i> 6.3k</span>
+                            </div>
+                        </div>
+                        <p>Roy Brooks' tight drum break became a hip-hop staple in the 1980s.</p>
+                    </div>
+                    <div class="play-btn" data-title="Impeach the President - The Honey Drippers" data-cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+
+                <!-- Beat Card 4 -->
+                <div class="beat-card" data-category="jazz">
+                    <div class="beat-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="The Soul Searchers">
+                        <div class="beat-overlay">
+                            <span class="beat-category">Jazz</span>
+                        </div>
+                    </div>
+                    <div class="beat-info">
+                        <h3>"Ashley's Roachclip" - The Soul Searchers</h3>
+                        <div class="beat-meta">
+                            <span>1974</span>
+                            <div class="beat-stats">
+                                <span><i class="fas fa-music"></i> 7.6k</span>
+                                <span><i class="fas fa-heart"></i> 5.2k</span>
+                            </div>
+                        </div>
+                        <p>The "Think" break, sampled in early hip-hop and modern electronic music.</p>
+                    </div>
+                    <div class="play-btn" data-title="Ashley's Roachclip - The Soul Searchers" data-cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+
+                <!-- Beat Card 5 -->
+                <div class="beat-card" data-category="funk">
+                    <div class="beat-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Incredible Bongo Band">
+                        <div class="beat-overlay">
+                            <span class="beat-category">Funk</span>
+                        </div>
+                    </div>
+                    <div class="beat-info">
+                        <h3>"Apache" - Incredible Bongo Band</h3>
+                        <div class="beat-meta">
+                            <span>1973</span>
+                            <div class="beat-stats">
+                                <span><i class="fas fa-music"></i> 9.4k</span>
+                                <span><i class="fas fa-heart"></i> 6.8k</span>
+                            </div>
+                        </div>
+                        <p>The foundation of hip-hop's b-boy culture and breakdancing.</p>
+                    </div>
+                    <div class="play-btn" data-title="Apache - Incredible Bongo Band" data-cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+
+                <!-- Beat Card 6 -->
+                <div class="beat-card" data-category="soul">
+                    <div class="beat-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Melvin Bliss">
+                        <div class="beat-overlay">
+                            <span class="beat-category">Soul</span>
+                        </div>
+                    </div>
+                    <div class="beat-info">
+                        <h3>"Synthetic Substitution" - Melvin Bliss</h3>
+                        <div class="beat-meta">
+                            <span>1973</span>
+                            <div class="beat-stats">
+                                <span><i class="fas fa-music"></i> 7.1k</span>
+                                <span><i class="fas fa-heart"></i> 5.0k</span>
+                            </div>
+                        </div>
+                        <p>Hard-hitting break used extensively in East Coast hip-hop.</p>
+                    </div>
+                    <div class="play-btn" data-title="Synthetic Substitution - Melvin Bliss" data-cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+
+                <!-- Beat Card 7 -->
+                <div class="beat-card" data-category="rock">
+                    <div class="beat-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Led Zeppelin">
+                        <div class="beat-overlay">
+                            <span class="beat-category">Rock</span>
+                        </div>
+                    </div>
+                    <div class="beat-info">
+                        <h3>"When the Levee Breaks" - Led Zeppelin</h3>
+                        <div class="beat-meta">
+                            <span>1971</span>
+                            <div class="beat-stats">
+                                <span><i class="fas fa-music"></i> 6.5k</span>
+                                <span><i class="fas fa-heart"></i> 4.7k</span>
+                            </div>
+                        </div>
+                        <p>John Bonham's thunderous drum beat sampled in numerous hip-hop tracks.</p>
+                    </div>
+                    <div class="play-btn" data-title="When the Levee Breaks - Led Zeppelin" data-cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+
+                <!-- Beat Card 8 -->
+                <div class="beat-card" data-category="funk">
+                    <div class="beat-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Bob James">
+                        <div class="beat-overlay">
+                            <span class="beat-category">Funk</span>
+                        </div>
+                    </div>
+                    <div class="beat-info">
+                        <h3>"Nautilus" - Bob James</h3>
+                        <div class="beat-meta">
+                            <span>1974</span>
+                            <div class="beat-stats">
+                                <span><i class="fas fa-music"></i> 5.9k</span>
+                                <span><i class="fas fa-heart"></i> 4.2k</span>
+                            </div>
+                        </div>
+                        <p>Not just drums - this entire instrumental break has been sampled endlessly.</p>
+                    </div>
+                    <div class="play-btn" data-title="Nautilus - Bob James" data-cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="featured-breakbeats">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured in Music History</h2>
+                <a href="#" class="btn">View All</a>
+            </div>
+
+            <div class="featured-slider">
+                <!-- Featured Item 1 -->
+                <div class="featured-beat">
+                    <div class="featured-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Straight Outta Compton">
+                        <div class="featured-overlay">
+                            <span class="featured-tag">Hip-Hop</span>
+                            <h3>NWA - "Straight Outta Compton"</h3>
+                        </div>
+                    </div>
+                    <div class="featured-info">
+                        <p>Dr. Dre's production featured multiple classic breaks including "Funky Drummer" and "Impeach the President"</p>
+                        <div class="featured-stats">
+                            <div class="stats-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>1988</span>
+                            </div>
+                            <div class="stats-item">
+                                <i class="fas fa-music"></i>
+                                <span>3 Breaks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Item 2 -->
+                <div class="featured-beat">
+                    <div class="featured-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Paul's Boutique">
+                        <div class="featured-overlay">
+                            <span class="featured-tag">Hip-Hop</span>
+                            <h3>Beastie Boys - "Paul's Boutique"</h3>
+                        </div>
+                    </div>
+                    <div class="featured-info">
+                        <p>The Dust Brothers layered dozens of samples, including "Funky Drummer" and "Apache" to create dense sonic collages</p>
+                        <div class="featured-stats">
+                            <div class="stats-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>1989</span>
+                            </div>
+                            <div class="stats-item">
+                                <i class="fas fa-music"></i>
+                                <span>50+ Samples</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Item 3 -->
+                <div class="featured-beat">
+                    <div class="featured-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Enter the Wu-Tang">
+                        <div class="featured-overlay">
+                            <span class="featured-tag">Hip-Hop</span>
+                            <h3>Wu-Tang Clan - "Enter the Wu-Tang"</h3>
+                        </div>
+                    </div>
+                    <div class="featured-info">
+                        <p>RZA's production used "Think" and "Synthetic Substitution" breaks to create the Clan's signature gritty sound</p>
+                        <div class="featured-stats">
+                            <div class="stats-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>1993</span>
+                            </div>
+                            <div class="stats-item">
+                                <i class="fas fa-music"></i>
+                                <span>4 Breaks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Item 4 -->
+                <div class="featured-beat">
+                    <div class="featured-img">
+                        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Drum & Bass">
+                        <div class="featured-overlay">
+                            <span class="featured-tag">Electronic</span>
+                            <h3>Drum & Bass Classics</h3>
+                        </div>
+                    </div>
+                    <div class="featured-info">
+                        <p>The "Amen break" became the foundation of jungle and drum & bass music in the 1990s</p>
+                        <div class="featured-stats">
+                            <div class="stats-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>1990s</span>
+                            </div>
+                            <div class="stats-item">
+                                <i class="fas fa-music"></i>
+                                <span>1000+ Tracks</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contributors">
+        <div class="container">
+            <h2>Our Breakbeat Scholars</h2>
+            <p>The team dedicated to preserving and documenting breakbeat history</p>
+
+            <div class="contributor-grid">
+                <div class="contributor-card">
+                    <div class="contributor-img">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="DJ Historian">
+                    </div>
+                    <div class="contributor-info">
+                        <h4>DJ Historian</h4>
+                        <p>Breakbeat Archivist</p>
+                    </div>
+                </div>
+
+                <div class="contributor-card">
+                    <div class="contributor-img">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sample Queen">
+                    </div>
+                    <div class="contributor-info">
+                        <h4>Sample Queen</h4>
+                        <p>Sample Researcher</p>
+                    </div>
+                </div>
+
+                <div class="contributor-card">
+                    <div class="contributor-img">
+                        <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Vinyl Digger">
+                    </div>
+                    <div class="contributor-info">
+                        <h4>Vinyl Digger</h4>
+                        <p>Rare Records Specialist</p>
+                    </div>
+                </div>
+
+                <div class="contributor-card">
+                    <div class="contributor-img">
+                        <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="Beat Detective">
+                    </div>
+                    <div class="contributor-info">
+                        <h4>Beat Detective</h4>
+                        <p>Break Identification</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="newsletter">
+        <div class="container">
+            <h3>Never Miss a Break</h3>
+            <p>Subscribe to our newsletter for weekly breakbeat discoveries, sample histories, and featured artist spotlights.</p>
+
+            <form class="newsletter-form">
+                <input type="email" placeholder="Your email address">
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    
+												</html>
