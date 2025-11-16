@@ -2,6 +2,16 @@
 
 import * as Tone from "tone"
 
+const PAD_STATE_STORAGE_KEY = "mpc_pad_params_v1"
+
+const DEFAULT_EQ_PARAMS: EQParams = Object.freeze({
+  lowGain: 0,
+  lowMidGain: 0,
+  midGain: 0,
+  highMidGain: 0,
+  highGain: 0,
+})
+
 export interface Sample {
   id: number
   name: string
@@ -30,6 +40,45 @@ interface PadEQFilters {
   highMidFilter: Tone.Filter
 }
 
+export interface FXParams {
+  reverbSize: number
+  reverbTime: number
+  reverbWet: number
+  delayTime: Tone.Unit.Time
+  delayPingPong: boolean
+  delayWet: number
+  saturationAmount: number
+  phaserFrequency: number
+  phaserDepth: number
+  chorusFrequency: number
+  chorusDepth: number
+}
+
+export const DEFAULT_FX_PARAMS: FXParams = Object.freeze({
+  reverbSize: 0.5,
+  reverbTime: 1.0,
+  reverbWet: 0.3,
+  delayTime: "8n",
+  delayPingPong: false,
+  delayWet: 0.3,
+  saturationAmount: 0,
+  phaserFrequency: 0.5,
+  phaserDepth: 0.5,
+  chorusFrequency: 1.5,
+  chorusDepth: 0.5,
+} as FXParams)
+
+interface PadFXChain {
+  inputGain: Tone.Gain
+  saturation: Tone.Distortion
+  phaser: Tone.Phaser
+  chorus: Tone.Chorus
+  delay: Tone.FeedbackDelay
+  pingPongDelay: Tone.PingPongDelay
+  reverb: Tone.Reverb
+  currentDelayNode: Tone.FeedbackDelay | Tone.PingPongDelay
+}
+
 // Buffer source pool for efficient playback
 interface BufferSourceNode {
   source: Tone.ToneAudioBuffer
@@ -51,9 +100,12 @@ export class AudioEngine {
   private gainNodes: Map<number, Tone.Gain>
   private envelopes: Map<number, Tone.AmplitudeEnvelope>
   private eqFilters: Map<number, PadEQFilters>
-  private meterBuses: Map<number, Tone.Volume>
+  private meterBuses: Map<number, Tone.Gain>
+  private fxChains: Map<number, PadFXChain>
   private players: Map<number, Tone.Player> // Keep for backwards compatibility
   private padSettings: Map<number, PadSettings>
+  private padFXParams: Map<number, FXParams>
+  private padEQValues: Map<number, EQParams>
   private initialized = false
   private customSamples: Map<number, string> = new Map()
 
@@ -63,8 +115,12 @@ export class AudioEngine {
     this.envelopes = new Map()
     this.eqFilters = new Map()
     this.meterBuses = new Map()
+    this.fxChains = new Map()
     this.players = new Map()
     this.padSettings = new Map()
+    this.padFXParams = new Map()
+    this.padEQValues = new Map()
+    this.loadPersistedPadState()
   }
 
   static getInstance(): AudioEngine {
@@ -113,6 +169,23 @@ export class AudioEngine {
         oldEQ.highMidFilter.dispose()
       }
 
+      const oldFX = this.fxChains.get(padId)
+      if (oldFX) {
+        try {
+          oldFX.chorus.stop()
+        } catch {
+          // ignore
+        }
+        oldFX.inputGain.dispose()
+        oldFX.saturation.dispose()
+        oldFX.phaser.dispose()
+        oldFX.chorus.dispose()
+        oldFX.delay.dispose()
+        oldFX.pingPongDelay.dispose()
+        oldFX.reverb.dispose()
+        this.fxChains.delete(padId)
+      }
+
       const oldMeterBus = this.meterBuses.get(padId)
       if (oldMeterBus) {
         oldMeterBus.dispose()
@@ -158,12 +231,24 @@ export class AudioEngine {
         gain: 0,
       })
 
-      // Create a meter bus for VU metering (fan-out node)
-      const meterBus = new Tone.Volume(0).toDestination()
+      // Create a meter bus for VU metering (fan-out tap only; NOT routed to destination)
+      const meterBus = new Tone.Gain(1)
       
       // Connect persistent gain node: gainNode → destination + meterBus (fan-out)
       gainNode.toDestination()
       gainNode.connect(meterBus)
+
+      const fxChain = this.createPadFXChain(gainNode, {
+        eq3,
+        lowMidFilter,
+        highMidFilter,
+      })
+      this.fxChains.set(padId, fxChain)
+      const fxState =
+        this.padFXParams.get(padId) ?? this.createDefaultFXParams()
+      const normalizedFx = { ...this.createDefaultFXParams(), ...fxState }
+      this.padFXParams.set(padId, normalizedFx)
+      this.applyFXParams(padId, normalizedFx)
 
       // Store everything
       this.buffers.set(padId, buffer)
@@ -175,6 +260,12 @@ export class AudioEngine {
         lowMidFilter,
         highMidFilter,
       })
+      const storedEQ = this.padEQValues.get(padId)
+      if (storedEQ) {
+        this.applyEQParams(padId, storedEQ)
+      } else {
+        this.padEQValues.set(padId, { ...DEFAULT_EQ_PARAMS })
+      }
 
       // Create a player for backwards compatibility (waveform display, etc.)
       const player = new Tone.Player({
@@ -232,6 +323,7 @@ export class AudioEngine {
     const sourceEnvelope = this.envelopes.get(padId)
     const settings = this.padSettings.get(padId)
     const persistentGainNode = this.gainNodes.get(padId)
+    const padFXChain = this.fxChains.get(padId)
 
     if (!buffer || !buffer.loaded || !sourceEnvelope) return
 
@@ -283,7 +375,9 @@ export class AudioEngine {
       
       // Connect through persistent gain node (for VU metering)
       bufferSource.connect(envelopeGain)
-      if (persistentGainNode) {
+      if (padFXChain) {
+        envelopeGain.connect(padFXChain.inputGain)
+      } else if (persistentGainNode) {
         envelopeGain.connect(persistentGainNode)
       } else {
         // Fallback if no persistent gain node
@@ -341,48 +435,232 @@ export class AudioEngine {
   }
 
   setEQ(padId: number, params: Partial<EQParams>) {
-    const filters = this.eqFilters.get(padId)
-    if (!filters) return
+    const next = { ...(this.padEQValues.get(padId) ?? DEFAULT_EQ_PARAMS) }
+    if (params.lowGain !== undefined) next.lowGain = params.lowGain
+    if (params.lowMidGain !== undefined) next.lowMidGain = params.lowMidGain
+    if (params.midGain !== undefined) next.midGain = params.midGain
+    if (params.highMidGain !== undefined) next.highMidGain = params.highMidGain
+    if (params.highGain !== undefined) next.highGain = params.highGain
 
-    // EQ3 handles low, mid, high bands
-    if (params.lowGain !== undefined) {
-      filters.eq3.low.value = params.lowGain
-    }
-    if (params.midGain !== undefined) {
-      filters.eq3.mid.value = params.midGain
-    }
-    if (params.highGain !== undefined) {
-      filters.eq3.high.value = params.highGain
-    }
-
-    // Additional filters for low-mid and high-mid
-    if (params.lowMidGain !== undefined) {
-      filters.lowMidFilter.gain.value = params.lowMidGain
-    }
-    if (params.highMidGain !== undefined) {
-      filters.highMidFilter.gain.value = params.highMidGain
-    }
+    this.padEQValues.set(padId, next)
+    this.applyEQParams(padId, next)
+    this.persistPadState()
   }
 
   getEQ(padId: number): EQParams {
-    const filters = this.eqFilters.get(padId)
-    if (!filters) {
-      return {
-        lowGain: 0,
-        lowMidGain: 0,
-        midGain: 0,
-        highMidGain: 0,
-        highGain: 0,
-      }
+    const stored = this.padEQValues.get(padId)
+    if (stored) {
+      return { ...stored }
     }
 
-    return {
-      lowGain: filters.eq3.low.value,
-      lowMidGain: filters.lowMidFilter.gain.value,
-      midGain: filters.eq3.mid.value,
-      highMidGain: filters.highMidFilter.gain.value,
-      highGain: filters.eq3.high.value,
+    const filters = this.eqFilters.get(padId)
+    if (filters) {
+      const current: EQParams = {
+        lowGain: filters.eq3.low.value,
+        lowMidGain: filters.lowMidFilter.gain.value,
+        midGain: filters.eq3.mid.value,
+        highMidGain: filters.highMidFilter.gain.value,
+        highGain: filters.eq3.high.value,
+      }
+      this.padEQValues.set(padId, current)
+      return { ...current }
     }
+
+    return { ...DEFAULT_EQ_PARAMS }
+  }
+
+  setFX(padId: number, params: Partial<FXParams>) {
+    const current = this.padFXParams.get(padId) ?? this.createDefaultFXParams()
+    const next = { ...current, ...params }
+    this.padFXParams.set(padId, next)
+    this.applyFXParams(padId, next)
+    this.persistPadState()
+  }
+
+  getFX(padId: number): FXParams {
+    const current = this.padFXParams.get(padId)
+    return current ? { ...current } : this.createDefaultFXParams()
+  }
+
+  private loadPersistedPadState() {
+    if (typeof window === "undefined") return
+    try {
+      const raw = window.localStorage.getItem(PAD_STATE_STORAGE_KEY)
+      if (!raw) return
+      const parsed = JSON.parse(raw) as Record<
+        string,
+        {
+          fx?: Partial<FXParams>
+          eq?: Partial<EQParams>
+        }
+      >
+      Object.entries(parsed).forEach(([padKey, state]) => {
+        const padId = Number.parseInt(padKey, 10)
+        if (Number.isNaN(padId)) return
+        if (state.eq) {
+          this.padEQValues.set(padId, { ...DEFAULT_EQ_PARAMS, ...state.eq })
+        }
+        if (state.fx) {
+          this.padFXParams.set(padId, { ...this.createDefaultFXParams(), ...state.fx })
+        }
+      })
+    } catch (error) {
+      console.error("[AudioEngine] Failed to load pad params:", error)
+    }
+  }
+
+  private persistPadState() {
+    if (typeof window === "undefined") return
+    try {
+      const padIds = new Set<number>([
+        ...this.padEQValues.keys(),
+        ...this.padFXParams.keys(),
+      ])
+      const payload: Record<number, { fx?: FXParams; eq?: EQParams }> = {}
+      padIds.forEach((padId) => {
+        const entry: { fx?: FXParams; eq?: EQParams } = {}
+        const eq = this.padEQValues.get(padId)
+        if (eq) {
+          entry.eq = { ...eq }
+        }
+        const fx = this.padFXParams.get(padId)
+        if (fx) {
+          entry.fx = { ...fx }
+        }
+        if (entry.fx || entry.eq) {
+          payload[padId] = entry
+        }
+      })
+      window.localStorage.setItem(PAD_STATE_STORAGE_KEY, JSON.stringify(payload))
+    } catch (error) {
+      console.error("[AudioEngine] Failed to persist pad params:", error)
+    }
+  }
+
+  private createDefaultFXParams(): FXParams {
+    return { ...DEFAULT_FX_PARAMS }
+  }
+
+  private applyEQParams(padId: number, params: EQParams) {
+    const filters = this.eqFilters.get(padId)
+    if (!filters) return
+
+    filters.eq3.low.value = params.lowGain
+    filters.eq3.mid.value = params.midGain
+    filters.eq3.high.value = params.highGain
+    filters.lowMidFilter.gain.value = params.lowMidGain
+    filters.highMidFilter.gain.value = params.highMidGain
+  }
+
+  private createPadFXChain(gainNode: Tone.Gain, eqNodes: PadEQFilters): PadFXChain {
+    const inputGain = new Tone.Gain(1)
+    const saturation = new Tone.Distortion(0)
+    saturation.oversample = "4x"
+
+    const phaser = new Tone.Phaser({
+      frequency: 0.5,
+      octaves: 2,
+      baseFrequency: 350,
+      wet: 0,
+    })
+
+    const chorus = new Tone.Chorus({
+      frequency: 1.5,
+      depth: 0.5,
+      wet: 0,
+      spread: 60,
+    }).start()
+
+    const delay = new Tone.FeedbackDelay("8n", 0.2)
+    const pingPongDelay = new Tone.PingPongDelay("8n", 0.2)
+
+    const reverb = new Tone.Reverb({
+      decay: 1.2,
+      preDelay: 0.01,
+      wet: 0.3,
+    })
+    reverb.generate().catch(() => {
+      // Ignore impulse errors and continue with default buffer
+    })
+
+    inputGain.connect(saturation)
+    saturation.connect(eqNodes.eq3)
+    eqNodes.eq3.connect(eqNodes.lowMidFilter)
+    eqNodes.lowMidFilter.connect(eqNodes.highMidFilter)
+    eqNodes.highMidFilter.connect(phaser)
+    phaser.connect(chorus)
+    chorus.connect(delay)
+    delay.connect(reverb)
+    reverb.connect(gainNode)
+
+    return {
+      inputGain,
+      saturation,
+      phaser,
+      chorus,
+      delay,
+      pingPongDelay,
+      reverb,
+      currentDelayNode: delay,
+    }
+  }
+
+  private updateDelayRouting(chain: PadFXChain, usePingPong: boolean) {
+    const nextNode = usePingPong ? chain.pingPongDelay : chain.delay
+    if (chain.currentDelayNode === nextNode) {
+      return
+    }
+
+    try {
+      chain.chorus.disconnect(chain.currentDelayNode)
+    } catch {
+      // ignore
+    }
+
+    try {
+      chain.currentDelayNode.disconnect(chain.reverb)
+    } catch {
+      // ignore
+    }
+
+    chain.chorus.connect(nextNode)
+    nextNode.connect(chain.reverb)
+    chain.currentDelayNode = nextNode
+  }
+
+  private applyFXParams(padId: number, params: FXParams) {
+    const chain = this.fxChains.get(padId)
+    if (!chain) return
+
+    const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+
+    chain.saturation.distortion = clamp(params.saturationAmount / 10, 0, 1)
+
+    chain.reverb.wet.value = clamp(params.reverbWet, 0, 1)
+    chain.reverb.decay = clamp(params.reverbTime, 0.1, 10)
+    chain.reverb.preDelay = clamp(params.reverbSize * 0.1, 0, 0.2)
+
+    chain.delay.delayTime.value = params.delayTime
+    chain.pingPongDelay.delayTime.value = params.delayTime
+
+    const wet = clamp(params.delayWet, 0, 1)
+    if (params.delayPingPong) {
+      chain.delay.wet.value = 0
+      chain.pingPongDelay.wet.value = wet
+    } else {
+      chain.delay.wet.value = wet
+      chain.pingPongDelay.wet.value = 0
+    }
+
+    this.updateDelayRouting(chain, params.delayPingPong)
+
+    chain.phaser.frequency.value = clamp(params.phaserFrequency, 0.1, 10)
+    chain.phaser.octaves = clamp(params.phaserDepth * 4, 0.1, 6)
+    chain.phaser.wet.value = clamp(params.phaserDepth, 0, 1)
+
+    chain.chorus.frequency.value = clamp(params.chorusFrequency, 0.1, 10)
+    chain.chorus.depth = clamp(params.chorusDepth, 0, 1)
+    chain.chorus.wet.value = clamp(params.chorusDepth, 0, 1)
   }
 
   getPlayer(padId: number): Tone.Player | undefined {
@@ -393,7 +671,7 @@ export class AudioEngine {
     return this.envelopes.get(padId)
   }
 
-  getMeterBus(padId: number): Tone.Volume | undefined {
+  getMeterBus(padId: number): Tone.Gain | undefined {
     return this.meterBuses.get(padId)
   }
 
@@ -453,12 +731,29 @@ export class AudioEngine {
       filters.lowMidFilter.dispose()
       filters.highMidFilter.dispose()
     })
+    this.fxChains.forEach((chain) => {
+      try {
+        chain.chorus.stop()
+      } catch {
+        // ignore
+      }
+      chain.inputGain.dispose()
+      chain.saturation.dispose()
+      chain.phaser.dispose()
+      chain.chorus.dispose()
+      chain.delay.dispose()
+      chain.pingPongDelay.dispose()
+      chain.reverb.dispose()
+    })
     this.buffers.clear()
     this.gainNodes.clear()
     this.players.clear()
     this.envelopes.clear()
     this.meterBuses.clear()
     this.eqFilters.clear()
+    this.fxChains.clear()
+    this.padFXParams.clear()
+    this.padEQValues.clear()
     this.customSamples.clear()
     this.initialized = false
   }

@@ -8,7 +8,7 @@ import { RenamePadModal } from "@/components/rename-pad-modal"
 import { SequencerGrid } from "@/components/sequencer-grid"
 import { TransportControls } from "@/components/transport-controls"
 import { WaveformEditor } from "@/components/waveform-editor"
-import { AudioEngine, type EQParams } from "@/lib/audio-engine"
+import { AudioEngine, DEFAULT_FX_PARAMS, type EQParams, type FXParams } from "@/lib/audio-engine"
 import { DRUM_KITS, PAD_NAMES } from "@/lib/drum-kits"
 import { Sequencer } from "@/lib/sequencer"
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -651,6 +651,12 @@ export default function MPCPage() {
     setDisplayInfo(`PAD ${selectedPad + 1} EQ UPDATED`)
   }
 
+  const handleFXChange = (params: Partial<FXParams>) => {
+    if (!audioEngineRef.current || selectedPad === null) return
+    audioEngineRef.current.setFX(selectedPad, params)
+    setDisplayInfo(`PAD ${selectedPad + 1} FX UPDATED`)
+  }
+
   const getADSR = (padId: number) => {
     if (!audioEngineRef.current) {
       return { attack: 0.01, decay: 0.1, sustain: 0.5, release: 0.2 }
@@ -663,6 +669,13 @@ export default function MPCPage() {
       return { lowGain: 0, lowMidGain: 0, midGain: 0, highMidGain: 0, highGain: 0 }
     }
     return audioEngineRef.current.getEQ(padId)
+  }
+
+  const getFX = (padId: number) => {
+    if (!audioEngineRef.current) {
+      return { ...DEFAULT_FX_PARAMS }
+    }
+    return audioEngineRef.current.getFX(padId)
   }
 
   const getPlayer = (padId: number) => {
@@ -765,9 +778,11 @@ export default function MPCPage() {
               onPitchChange={handlePitchChange}
               onADSRChange={handleADSRChange}
               onEQChange={handleEQChange}
+              onFXChange={handleFXChange}
               getPlayer={getPlayer}
               getADSR={getADSR}
               getEQ={getEQ}
+              getFX={getFX}
               getStartPoint={getStartPoint}
               getEndPoint={getEndPoint}
               getPitch={getPitch}

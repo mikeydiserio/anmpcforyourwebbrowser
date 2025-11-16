@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import type * as Tone from "tone"
 import { Knob } from "./knob"
-import type { ADSRParams, EQParams } from "@/lib/audio-engine"
+import { DEFAULT_FX_PARAMS } from "@/lib/audio-engine"
+import type { ADSRParams, EQParams, FXParams } from "@/lib/audio-engine"
 
 const EditorContainer = styled.div`
   background: linear-gradient(145deg, #c8c0b0, #b0a898);
@@ -482,9 +483,11 @@ interface WaveformEditorProps {
   onPitchChange: (value: number) => void
   onADSRChange: (params: Partial<ADSRParams>) => void
   onEQChange: (params: Partial<EQParams>) => void
+  onFXChange: (params: Partial<FXParams>) => void
   getPlayer: (padId: number) => Tone.Player | undefined
   getADSR: (padId: number) => ADSRParams
   getEQ: (padId: number) => EQParams
+  getFX: (padId: number) => FXParams
   getStartPoint: (padId: number) => number
   getEndPoint: (padId: number) => number
   getPitch: (padId: number) => number
@@ -502,9 +505,11 @@ export function WaveformEditor({
   onPitchChange,
   onADSRChange,
   onEQChange,
+  onFXChange,
   getPlayer,
   getADSR,
   getEQ,
+  getFX,
   getStartPoint,
   getEndPoint,
   getPitch,
@@ -536,19 +541,7 @@ export function WaveformEditor({
     highGain: 0,
   })
 
-  const [fxParams, setFxParams] = useState({
-    reverbSize: 0.5,
-    reverbTime: 1.0,
-    reverbWet: 0.3,
-    delayTime: "8n" as "16n" | "8n" | "4n" | "2n" | "16t" | "8t" | "4t",
-    delayPingPong: false,
-    delayWet: 0.3,
-    saturationAmount: 0,
-    phaserFrequency: 0.5,
-    phaserDepth: 0.5,
-    chorusFrequency: 1.5,
-    chorusDepth: 0.5,
-  })
+  const [fxParams, setFxParams] = useState<FXParams>({ ...DEFAULT_FX_PARAMS })
 
   const drawWaveform = (player: Tone.Player) => {
     const canvas = canvasRef.current
@@ -726,12 +719,16 @@ export function WaveformEditor({
       setAdsr(currentADSR)
       const currentEQ = getEQ(selectedPad)
       setEqParams(currentEQ)
+      const currentFX = getFX(selectedPad)
+      setFxParams(currentFX)
       setStartPoint(getStartPoint(selectedPad))
       setEndPoint(getEndPoint(selectedPad))
       setPitch(getPitch(selectedPad))
       setVolume(getVolume(selectedPad))
+    } else {
+      setFxParams({ ...DEFAULT_FX_PARAMS })
     }
-  }, [selectedPad, getADSR, getEQ, getStartPoint, getEndPoint, getPitch, getVolume])
+  }, [selectedPad, getADSR, getEQ, getFX, getStartPoint, getEndPoint, getPitch, getVolume])
 
   useEffect(() => {
     drawEQEnvelope()
@@ -1034,7 +1031,12 @@ export function WaveformEditor({
                   value={fxParams.reverbSize}
                   min={0}
                   max={1}
-                  onChange={(value) => setFxParams((prev) => ({ ...prev, reverbSize: value }))}
+                  onChange={(value) => {
+                    setFxParams((prev) => ({ ...prev, reverbSize: value }))
+                    if (selectedPad !== null) {
+                      onFXChange({ reverbSize: value })
+                    }
+                  }}
                   disabled={selectedPad === null}
                 />
                 <Knob
@@ -1042,7 +1044,12 @@ export function WaveformEditor({
                   value={fxParams.reverbTime}
                   min={0.1}
                   max={5}
-                  onChange={(value) => setFxParams((prev) => ({ ...prev, reverbTime: value }))}
+                  onChange={(value) => {
+                    setFxParams((prev) => ({ ...prev, reverbTime: value }))
+                    if (selectedPad !== null) {
+                      onFXChange({ reverbTime: value })
+                    }
+                  }}
                   disabled={selectedPad === null}
                   unit="s"
                 />
@@ -1051,7 +1058,12 @@ export function WaveformEditor({
                   value={fxParams.reverbWet}
                   min={0}
                   max={1}
-                  onChange={(value) => setFxParams((prev) => ({ ...prev, reverbWet: value }))}
+                  onChange={(value) => {
+                    setFxParams((prev) => ({ ...prev, reverbWet: value }))
+                    if (selectedPad !== null) {
+                      onFXChange({ reverbWet: value })
+                    }
+                  }}
                   disabled={selectedPad === null}
                 />
               </FXKnobsRow>
@@ -1064,12 +1076,16 @@ export function WaveformEditor({
                   <ControlLabel>Timing</ControlLabel>
                   <FXSelect
                     value={fxParams.delayTime}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const value = e.target.value as FXParams["delayTime"]
                       setFxParams((prev) => ({
                         ...prev,
-                        delayTime: e.target.value as typeof fxParams.delayTime,
+                        delayTime: value,
                       }))
-                    }
+                      if (selectedPad !== null) {
+                        onFXChange({ delayTime: value })
+                      }
+                    }}
                     disabled={selectedPad === null}
                   >
                     <option value="16n">16th Note</option>
@@ -1085,7 +1101,13 @@ export function WaveformEditor({
                   <ControlLabel>Mode</ControlLabel>
                   <FXSelect
                     value={fxParams.delayPingPong ? "pingpong" : "normal"}
-                    onChange={(e) => setFxParams((prev) => ({ ...prev, delayPingPong: e.target.value === "pingpong" }))}
+                    onChange={(e) => {
+                      const isPingPong = e.target.value === "pingpong"
+                      setFxParams((prev) => ({ ...prev, delayPingPong: isPingPong }))
+                      if (selectedPad !== null) {
+                        onFXChange({ delayPingPong: isPingPong })
+                      }
+                    }}
                     disabled={selectedPad === null}
                   >
                     <option value="normal">Normal</option>
@@ -1097,7 +1119,12 @@ export function WaveformEditor({
                   value={fxParams.delayWet}
                   min={0}
                   max={1}
-                  onChange={(value) => setFxParams((prev) => ({ ...prev, delayWet: value }))}
+                  onChange={(value) => {
+                    setFxParams((prev) => ({ ...prev, delayWet: value }))
+                    if (selectedPad !== null) {
+                      onFXChange({ delayWet: value })
+                    }
+                  }}
                   disabled={selectedPad === null}
                 />
               </FXKnobsRow>
@@ -1111,7 +1138,12 @@ export function WaveformEditor({
                   value={fxParams.saturationAmount}
                   min={0}
                   max={10}
-                  onChange={(value) => setFxParams((prev) => ({ ...prev, saturationAmount: value }))}
+                  onChange={(value) => {
+                    setFxParams((prev) => ({ ...prev, saturationAmount: value }))
+                    if (selectedPad !== null) {
+                      onFXChange({ saturationAmount: value })
+                    }
+                  }}
                   disabled={selectedPad === null}
                 />
                 <Knob
@@ -1119,7 +1151,12 @@ export function WaveformEditor({
                   value={fxParams.phaserFrequency}
                   min={0.1}
                   max={5}
-                  onChange={(value) => setFxParams((prev) => ({ ...prev, phaserFrequency: value }))}
+                  onChange={(value) => {
+                    setFxParams((prev) => ({ ...prev, phaserFrequency: value }))
+                    if (selectedPad !== null) {
+                      onFXChange({ phaserFrequency: value })
+                    }
+                  }}
                   disabled={selectedPad === null}
                   unit="Hz"
                 />
@@ -1128,7 +1165,12 @@ export function WaveformEditor({
                   value={fxParams.phaserDepth}
                   min={0}
                   max={1}
-                  onChange={(value) => setFxParams((prev) => ({ ...prev, phaserDepth: value }))}
+                  onChange={(value) => {
+                    setFxParams((prev) => ({ ...prev, phaserDepth: value }))
+                    if (selectedPad !== null) {
+                      onFXChange({ phaserDepth: value })
+                    }
+                  }}
                   disabled={selectedPad === null}
                 />
                 <Knob
@@ -1136,7 +1178,12 @@ export function WaveformEditor({
                   value={fxParams.chorusFrequency}
                   min={0.5}
                   max={10}
-                  onChange={(value) => setFxParams((prev) => ({ ...prev, chorusFrequency: value }))}
+                  onChange={(value) => {
+                    setFxParams((prev) => ({ ...prev, chorusFrequency: value }))
+                    if (selectedPad !== null) {
+                      onFXChange({ chorusFrequency: value })
+                    }
+                  }}
                   disabled={selectedPad === null}
                   unit="Hz"
                 />
@@ -1145,7 +1192,12 @@ export function WaveformEditor({
                   value={fxParams.chorusDepth}
                   min={0}
                   max={1}
-                  onChange={(value) => setFxParams((prev) => ({ ...prev, chorusDepth: value }))}
+                  onChange={(value) => {
+                    setFxParams((prev) => ({ ...prev, chorusDepth: value }))
+                    if (selectedPad !== null) {
+                      onFXChange({ chorusDepth: value })
+                    }
+                  }}
                   disabled={selectedPad === null}
                 />
               </FXKnobsRow>

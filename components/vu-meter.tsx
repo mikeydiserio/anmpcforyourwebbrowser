@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import styled from "styled-components"
 import * as Tone from "tone"
 
@@ -32,17 +32,13 @@ const MeterBar = styled.div`
   overflow: hidden;
 `
 
-const MeterFill = styled.div<{ level: number }>`
+const MeterFill = styled.div`
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: ${(props) => props.level}%;
-  background: ${(props) => {
-    if (props.level > 85) return "#ff3333"
-    if (props.level > 70) return "#ffaa33"
-    return "#33ff66"
-  }};
+  height: 0%;
+  background: #33ff66;
   transition: height 0.05s ease-out;
 `
 
@@ -55,15 +51,19 @@ interface VUMeterProps {
 }
 
 export function VUMeter({ label, player, envelope, meterBus, isMaster = false }: VUMeterProps) {
-  const [level, setLevel] = useState(0)
   const meterRef = useRef<Tone.Meter | null>(null)
   const animationRef = useRef<number>()
+  const fillRef = useRef<HTMLDivElement | null>(null)
+  const lastTickRef = useRef<number>(0)
 
   useEffect(() => {
     // Prefer meterBus (fan-out from envelope), then envelope, then player
     const audioNode = meterBus || envelope || player
     if (!audioNode) {
-      setLevel(0)
+      if (fillRef.current) {
+        fillRef.current.style.height = "0%"
+        fillRef.current.style.background = "#33ff66"
+      }
       return
     }
 
@@ -72,19 +72,23 @@ export function VUMeter({ label, player, envelope, meterBus, isMaster = false }:
     audioNode.connect(meter)
     meterRef.current = meter
 
-    const updateLevel = () => {
-      if (meterRef.current) {
-        const value = meterRef.current.getValue()
-        const dbValue = typeof value === "number" ? value : value[0]
-        // Convert dB to percentage (0-100)
-        // Normalize: -60dB to 0dB maps to 0% to 100%
-        const normalized = Math.max(0, Math.min(100, ((dbValue + 60) / 60) * 100))
-        setLevel(normalized)
+    const updateLevel = (now: number) => {
+      const last = lastTickRef.current
+      if (!last || now - last >= 33) {
+        lastTickRef.current = now
+        if (meterRef.current && fillRef.current) {
+          const value = meterRef.current.getValue()
+          const dbValue = typeof value === "number" ? value : value[0]
+          const normalized = Math.max(0, Math.min(100, ((dbValue + 60) / 60) * 100))
+          fillRef.current.style.height = `${normalized}%`
+          const color = normalized > 85 ? "#ff3333" : normalized > 70 ? "#ffaa33" : "#33ff66"
+          fillRef.current.style.background = color
+        }
       }
       animationRef.current = requestAnimationFrame(updateLevel)
     }
 
-    updateLevel()
+    animationRef.current = requestAnimationFrame(updateLevel)
 
     return () => {
       if (animationRef.current) {
@@ -99,7 +103,7 @@ export function VUMeter({ label, player, envelope, meterBus, isMaster = false }:
   return (
     <MeterContainer>
       <MeterBar>
-        <MeterFill level={level} />
+        <MeterFill ref={fillRef} />
       </MeterBar>
       <MeterLabel>{label}</MeterLabel>
     </MeterContainer>

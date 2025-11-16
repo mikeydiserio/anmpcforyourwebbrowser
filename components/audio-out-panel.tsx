@@ -77,7 +77,7 @@ interface AudioOutPanelProps {
   padLabels: string[]
   getPlayer: (padId: number) => Tone.Player | undefined
   getEnvelope?: (padId: number) => Tone.AmplitudeEnvelope | undefined
-  getMeterBus?: (padId: number) => Tone.Volume | undefined
+  getMeterBus?: (padId: number) => (Tone.Gain | Tone.AudioNode | undefined)
 }
 
 export function AudioOutPanel({ padLabels, getPlayer, getEnvelope, getMeterBus }: AudioOutPanelProps) {
