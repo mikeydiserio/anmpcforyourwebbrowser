@@ -9,7 +9,7 @@ interface DisplayScreenProps {
 }
 
 const Screen = styled.div`
-  background: 
+  background:
     linear-gradient(180deg, #1a3f6f 0%, #2a5f8f 50%, #1a3f6f 100%);
   border: 5px solid #0a0a0a;
   border-radius: 6px;
@@ -18,27 +18,27 @@ const Screen = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
-  box-shadow: 
+  box-shadow:
     inset 0 4px 12px rgba(0, 0, 0, 0.8),
     inset 0 -2px 6px rgba(100, 150, 200, 0.1),
     0 2px 6px rgba(0, 0, 0, 0.6);
   font-family: 'Courier New', monospace;
   position: relative;
-  
+
   /* LCD pixel grid texture */
   &::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 2px;
-    background-image: 
+    background-image:
       repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.15) 1px, rgba(0,0,0,0.15) 2px),
       repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.15) 1px, rgba(0,0,0,0.15) 2px);
     background-size: 2px 2px;
     opacity: 0.3;
     pointer-events: none;
   }
-  
+
   /* Glass reflection effect */
   &::after {
     content: "";
@@ -59,7 +59,7 @@ const ModeText = styled.div`
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
-  text-shadow: 
+  text-shadow:
     0 0 6px rgba(74, 222, 128, 0.8),
     0 0 12px rgba(74, 222, 128, 0.4),
     0 1px 2px rgba(0, 0, 0, 0.8);
@@ -70,7 +70,7 @@ const InfoText = styled.div`
   color: #60a5fa;
   font-size: 16px;
   font-weight: bold;
-  text-shadow: 
+  text-shadow:
     0 0 6px rgba(96, 165, 250, 0.8),
     0 0 12px rgba(96, 165, 250, 0.4),
     0 1px 2px rgba(0, 0, 0, 0.8);

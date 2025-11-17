@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef } from "react"
+import { useRef, useState } from "react"
 import styled from "styled-components"
 
 interface MPCPadProps {
@@ -47,21 +47,21 @@ const PadButton = styled.button<{ $isActive: boolean; $isDragOver: boolean }>`
     position: absolute;
     inset: 6px;
     border-radius: 4px;
-    background-image: 
+    background-image:
       repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.1) 1px, rgba(0,0,0,0.1) 2px),
       repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.1) 1px, rgba(0,0,0,0.1) 2px);
     background-size: 3px 3px;
     opacity: 0.6;
     pointer-events: none;
   }
-  
+
   /* Wear marks and scratches */
   &::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 6px;
-    background-image: 
+    background-image:
       linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.03) 45%, transparent 50%),
       radial-gradient(circle at 70% 20%, rgba(0,0,0,0.15) 0%, transparent 30%),
       radial-gradient(circle at 30% 80%, rgba(0,0,0,0.1) 0%, transparent 25%);
@@ -77,7 +77,7 @@ const PadButton = styled.button<{ $isActive: boolean; $isDragOver: boolean }>`
 
   &:active {
     transform: translateY(2px);
-    box-shadow: 
+    box-shadow:
       inset 0 4px 12px rgba(0,0,0,0.9),
       0 1px 2px rgba(0, 0, 0, 0.3);
   }
@@ -90,7 +90,7 @@ const PadLabel = styled.div`
   font-size: 9px;
   font-weight: bold;
   color: rgba(255, 255, 255, 0.8);
-  text-shadow: 
+  text-shadow:
     0 1px 3px rgba(0, 0, 0, 0.9),
     0 0 8px rgba(0, 0, 0, 0.6);
   letter-spacing: 0.5px;
@@ -119,7 +119,7 @@ const EditIcon = styled.button<{ $isVisible: boolean }>`
   position: absolute;
   top: 4px;
   right: 4px;
-  background: 
+  background:
     radial-gradient(circle at 30% 30%, #a0c8ed, #7eb3e8 50%, #5a9fd6);
   border: 2px solid #4a8fc4;
   border-radius: 50%;
@@ -132,10 +132,10 @@ const EditIcon = styled.button<{ $isVisible: boolean }>`
   opacity: ${(props) => (props.$isVisible ? 1 : 0)};
   transition: opacity 0.2s ease, transform 0.1s ease;
   z-index: 10;
-  box-shadow: 
+  box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  
+
   &:hover {
     background: radial-gradient(circle at 30% 30%, #b8d8f8, #90c3f0 50%, #6aa8e0);
     border-color: #5a9fd6;
@@ -144,7 +144,7 @@ const EditIcon = styled.button<{ $isVisible: boolean }>`
 
   &:active {
     transform: scale(0.95);
-    box-shadow: 
+    box-shadow:
       inset 0 2px 4px rgba(0, 0, 0, 0.4),
       0 1px 2px rgba(0, 0, 0, 0.3);
   }

@@ -16,7 +16,7 @@ import styled from "styled-components"
 
 const MPCContainer = styled.div`
   min-height: 100vh;
-  background: 
+  background:
     radial-gradient(circle at 50% 120%, rgba(0,0,0,0.15) 0%, transparent 70%),
     linear-gradient(135deg, #e0d4c0 0%, #c8bcaa 50%, #d4c8b6 100%);
   display: flex;
@@ -24,17 +24,17 @@ const MPCContainer = styled.div`
   justify-content: center;
   padding: 20px;
   position: relative;
-  
+
   @media (max-width: 768px) {
     padding: 10px;
     align-items: flex-start;
   }
-  
+
   &::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: 
+    background-image:
       repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.02) 2px, rgba(0,0,0,.02) 4px),
       repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,.02) 2px, rgba(0,0,0,.02) 4px);
     opacity: 0.5;
@@ -45,37 +45,37 @@ const MPCContainer = styled.div`
 const MPCBody = styled.div`
   width: 100%;
   max-width: 1600px;
-  background: 
+  background:
     linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%, rgba(0,0,0,0.1) 100%),
     linear-gradient(145deg, #f5f0e4, #ebe4d8);
   border-radius: 16px;
   padding: 36px;
-  box-shadow: 
+  box-shadow:
     0 30px 80px rgba(0, 0, 0, 0.4),
     0 10px 30px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
     inset 0 -2px 4px rgba(0,0,0,0.1);
   position: relative;
-  
+
   @media (max-width: 768px) {
     padding: 16px;
     padding-bottom: 80px; /* Space for mobile nav */
   }
-  
+
   /* Subtle scratches and wear marks */
   &::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 16px;
-    background-image: 
+    background-image:
       linear-gradient(45deg, transparent 48%, rgba(0,0,0,0.02) 49%, transparent 50%),
       linear-gradient(-45deg, transparent 48%, rgba(0,0,0,0.02) 49%, transparent 50%);
     background-size: 120px 120px, 80px 80px;
     opacity: 0.3;
     pointer-events: none;
   }
-  
+
   /* Edge beveling */
   &::after {
     content: "";
@@ -96,14 +96,14 @@ const SignatureText = styled.div`
   font-weight: 700;
   color: #c92a2a;
   opacity: 0.85;
-  text-shadow: 
+  text-shadow:
     1px 1px 2px rgba(255, 255, 255, 0.6),
     -1px -1px 1px rgba(0, 0, 0, 0.2);
   letter-spacing: 1px;
   transform: rotate(-2deg);
   pointer-events: none;
   z-index: 10;
-  
+
   @media (max-width: 768px) {
     font-size: 14px;
     right: 12px;
@@ -120,7 +120,7 @@ const Header = styled.div`
   border-bottom: 3px solid #b8aa98;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
   position: relative;
-  
+
   @media (max-width: 768px) {
     margin-bottom: 16px;
     padding-bottom: 12px;
@@ -138,12 +138,12 @@ const Brand = styled.h1`
   font-size: 28px;
   font-weight: bold;
   color: #c92a2a;
-  text-shadow: 
+  text-shadow:
     1px 1px 0 rgba(255, 255, 255, 0.4),
     -1px -1px 0 rgba(0, 0, 0, 0.3),
     0 2px 4px rgba(201, 42, 42, 0.3);
   letter-spacing: 2px;
-  
+
   @media (max-width: 768px) {
     font-size: 18px;
   }
@@ -154,7 +154,7 @@ const Model = styled.div`
   color: #665544;
   font-style: italic;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
-  
+
   @media (max-width: 768px) {
     font-size: 11px;
   }
@@ -169,7 +169,7 @@ const MainContent = styled.div`
     flex-direction: column;
     gap: 20px;
   }
-  
+
   @media (max-width: 768px) {
     margin-bottom: 0;
   }
@@ -179,7 +179,7 @@ const MobileViewContainer = styled.div<{ $visible: boolean }>`
   display: ${(props) => (props.$visible ? "flex" : "none")};
   flex-direction: column;
   gap: 16px;
-  
+
   @media (min-width: 769px) {
     display: none;
   }
@@ -188,7 +188,7 @@ const MobileViewContainer = styled.div<{ $visible: boolean }>`
 const DesktopViewContainer = styled.div`
   display: flex;
   gap: 32px;
-  
+
   @media (max-width: 768px) {
     display: none;
   }
@@ -196,17 +196,17 @@ const DesktopViewContainer = styled.div`
 
 const MobileNavigation = styled.nav`
   display: none;
-  
+
   @media (max-width: 768px) {
     display: flex;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    background: 
+    background:
       linear-gradient(145deg, #2f2f2f, #252525);
     border-top: 3px solid #1a1a1a;
-    box-shadow: 
+    box-shadow:
       0 -4px 16px rgba(0, 0, 0, 0.6),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
     z-index: 1000;
@@ -229,9 +229,9 @@ const MobileNavButton = styled.button<{ $active: boolean }>`
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 
+  box-shadow:
     ${(props) => (props.$active ? "inset 0 2px 6px rgba(0, 0, 0, 0.6)" : "0 2px 4px rgba(0, 0, 0, 0.4)")};
-  
+
   &:active {
     transform: translateY(1px);
   }
@@ -256,30 +256,30 @@ const PadGrid = styled.div`
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   padding: 20px;
-  background: 
+  background:
     linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 50%, #2a2a2a 100%);
   border-radius: 8px;
   border: 4px solid #1a1a1a;
-  box-shadow: 
+  box-shadow:
     inset 0 6px 16px rgba(0, 0, 0, 0.7),
     inset 0 1px 2px rgba(0, 0, 0, 0.9),
     0 2px 4px rgba(0, 0, 0, 0.5);
   max-width: 520px;
   position: relative;
-  
+
   @media (max-width: 768px) {
     max-width: 100%;
     padding: 12px;
     gap: 8px;
   }
-  
+
   /* Metal texture */
   &::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 4px;
-    background-image: 
+    background-image:
       repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255,255,255,0.02) 1px, rgba(255,255,255,0.02) 2px);
     opacity: 0.5;
     pointer-events: none;
@@ -287,21 +287,21 @@ const PadGrid = styled.div`
 `
 
 const Section = styled.div`
-  background: 
+  background:
     linear-gradient(145deg, #2f2f2f, #252525);
   padding: 18px;
   border-radius: 8px;
   border: 3px solid #1a1a1a;
-  box-shadow: 
+  box-shadow:
     inset 0 3px 8px rgba(0, 0, 0, 0.6),
     0 2px 4px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   position: relative;
-  
+
   @media (max-width: 768px) {
     padding: 12px;
   }
-  
+
   &::before {
     content: "";
     position: absolute;
@@ -364,7 +364,7 @@ export default function MPCPage() {
 
         const sequencer = new Sequencer()
         console.log("[v0] Sequencer created")
-        
+
         // Initialize swing, BPM, and pattern index from sequencer (loaded from localStorage)
         setSwing(sequencer.getSwing())
         setBPM(sequencer.getBPM())
@@ -441,7 +441,7 @@ export default function MPCPage() {
       if (renameModalOpen) {
         return
       }
-      
+
       // Check if the active element is an input, textarea, or contenteditable
       const activeElement = document.activeElement
       if (
@@ -535,17 +535,17 @@ export default function MPCPage() {
 
   const handleCopyPattern = () => {
     if (!sequencerRef.current) return
-    
+
     // Find the next empty pattern (or use next pattern if all are filled)
     let targetPattern = currentPatternIndex + 1
     if (targetPattern >= 99) targetPattern = 0
-    
+
     sequencerRef.current.copyPattern(currentPatternIndex, targetPattern)
     setCurrentPatternIndex(targetPattern)
-    
+
     const newPattern = sequencerRef.current.getPattern()
     setPattern(newPattern.steps.map((step) => step.map((pad) => pad.active)))
-    
+
     setDisplayInfo(`PATTERN ${String(currentPatternIndex + 1).padStart(2, "0")} COPIED TO ${String(targetPattern + 1).padStart(2, "0")}`)
   }
 
@@ -880,9 +880,11 @@ export default function MPCPage() {
             onPitchChange={handlePitchChange}
             onADSRChange={handleADSRChange}
             onEQChange={handleEQChange}
+            onFXChange={handleFXChange}
             getPlayer={getPlayer}
             getADSR={getADSR}
             getEQ={getEQ}
+            getFX={getFX}
             getStartPoint={getStartPoint}
             getEndPoint={getEndPoint}
             getPitch={getPitch}

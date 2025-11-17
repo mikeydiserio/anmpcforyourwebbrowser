@@ -1,8 +1,8 @@
 "use client"
 
 import styled from "styled-components"
-import { VUMeter } from "./vu-meter"
 import type * as Tone from "tone"
+import { VUMeter } from "./vu-meter"
 
 const Panel = styled.div`
   background: #2a2a2a;
@@ -75,9 +75,9 @@ const MasterLabel = styled.div`
 
 interface AudioOutPanelProps {
   padLabels: string[]
-  getPlayer: (padId: number) => Tone.Player | undefined
-  getEnvelope?: (padId: number) => Tone.AmplitudeEnvelope | undefined
-  getMeterBus?: (padId: number) => (Tone.Gain | Tone.AudioNode | undefined)
+  getPlayer?: (padId: number) => (Tone.Player | undefined)
+  getEnvelope?: (padId: number) => (Tone.AmplitudeEnvelope | undefined)
+  getMeterBus?: (padId: number) => (Tone.Gain | undefined)
 }
 
 export function AudioOutPanel({ padLabels, getPlayer, getEnvelope, getMeterBus }: AudioOutPanelProps) {
@@ -87,10 +87,10 @@ export function AudioOutPanel({ padLabels, getPlayer, getEnvelope, getMeterBus }
       <MetersLayout>
         <MetersGrid>
           {padLabels.map((label, idx) => (
-            <VUMeter 
-              key={idx} 
-              label={label} 
-              player={getPlayer(idx)} 
+            <VUMeter
+              key={idx}
+              label={label}
+              player={getPlayer ? getPlayer(idx) : undefined}
               envelope={getEnvelope ? getEnvelope(idx) : undefined}
               meterBus={getMeterBus ? getMeterBus(idx) : undefined}
             />

@@ -46,13 +46,13 @@ interface VUMeterProps {
   label: string
   player?: Tone.Player
   envelope?: Tone.AmplitudeEnvelope
-  meterBus?: Tone.Volume
+  meterBus?: Tone.Gain
   isMaster?: boolean
 }
 
 export function VUMeter({ label, player, envelope, meterBus, isMaster = false }: VUMeterProps) {
   const meterRef = useRef<Tone.Meter | null>(null)
-  const animationRef = useRef<number>()
+  const animationRef = useRef<number>(null)
   const fillRef = useRef<HTMLDivElement | null>(null)
   const lastTickRef = useRef<number>(0)
 

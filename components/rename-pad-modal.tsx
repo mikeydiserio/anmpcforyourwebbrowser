@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 
 interface RenamePadModalProps {
@@ -26,24 +26,24 @@ const ModalOverlay = styled.div<{ $isOpen: boolean }>`
 `
 
 const ModalContent = styled.div`
-  background: 
+  background:
     linear-gradient(145deg, #2f2f2f, #252525);
   border: 3px solid #1a1a1a;
   border-radius: 8px;
   padding: 24px;
   min-width: 320px;
   max-width: 90vw;
-  box-shadow: 
+  box-shadow:
     inset 0 3px 8px rgba(0, 0, 0, 0.6),
     0 8px 24px rgba(0, 0, 0, 0.8),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   position: relative;
-  
+
   @media (max-width: 768px) {
     min-width: 280px;
     padding: 20px;
   }
-  
+
   &::before {
     content: "";
     position: absolute;
@@ -80,32 +80,32 @@ const InputLabel = styled.label`
 const Input = styled.input`
   width: 100%;
   padding: 12px;
-  background: 
+  background:
     linear-gradient(145deg, #1a1a1a, #0f0f0f);
   border: 2px solid #333;
   border-radius: 4px;
   color: #fff;
   font-size: 14px;
   font-family: inherit;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.8),
     0 1px 0 rgba(255, 255, 255, 0.05);
-  
+
   &:focus {
     outline: none;
     border-color: #5a9fd6;
-    box-shadow: 
+    box-shadow:
       inset 0 2px 4px rgba(0, 0, 0, 0.8),
       0 0 8px rgba(90, 159, 214, 0.3);
   }
-  
+
   &::placeholder {
     color: #555;
   }
-  
+
   &[type="file"] {
     cursor: pointer;
-    
+
     &::file-selector-button {
       padding: 8px 16px;
       background: linear-gradient(145deg, #4a8fc4, #3a7fb4);
@@ -119,7 +119,7 @@ const Input = styled.input`
       cursor: pointer;
       margin-right: 12px;
       transition: all 0.2s;
-      
+
       &:hover {
         background: linear-gradient(145deg, #5a9fd6, #4a8fc4);
       }
@@ -129,7 +129,7 @@ const Input = styled.input`
 
 const SampleInfo = styled.div`
   padding: 12px;
-  background: 
+  background:
     linear-gradient(145deg, #1a1a1a, #0f0f0f);
   border: 2px solid #333;
   border-radius: 4px;
@@ -161,28 +161,28 @@ const Button = styled.button<{ $primary?: boolean }>`
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 
+  box-shadow:
     ${(props) =>
       props.$primary
         ? "0 2px 4px rgba(0, 0, 0, 0.4)"
         : "inset 0 2px 4px rgba(0, 0, 0, 0.6)"};
-  
+
   &:hover {
     background: ${(props) =>
       props.$primary
         ? "linear-gradient(145deg, #5a9fd6, #4a8fc4)"
         : "linear-gradient(145deg, #4a4a4a, #3a3a3a)"};
     transform: translateY(-1px);
-    box-shadow: 
+    box-shadow:
       ${(props) =>
         props.$primary
           ? "0 4px 8px rgba(0, 0, 0, 0.5)"
           : "0 2px 4px rgba(0, 0, 0, 0.4)"};
   }
-  
+
   &:active {
     transform: translateY(0);
-    box-shadow: 
+    box-shadow:
       inset 0 2px 4px rgba(0, 0, 0, 0.6),
       0 1px 2px rgba(0, 0, 0, 0.3);
   }
@@ -250,7 +250,7 @@ export const RenamePadModal: React.FC<RenamePadModalProps> = ({
     <ModalOverlay $isOpen={isOpen} onClick={handleOverlayClick}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <ModalTitle>Edit Pad {padId !== null ? padId + 1 : ""}</ModalTitle>
-        
+
         <InputContainer>
           <InputLabel>Current Sample</InputLabel>
           <SampleInfo>
@@ -280,7 +280,7 @@ export const RenamePadModal: React.FC<RenamePadModalProps> = ({
             maxLength={16}
           />
         </InputContainer>
-        
+
         <ButtonContainer>
           <Button onClick={onClose}>Close</Button>
           <Button $primary onClick={handleSave} disabled={!inputValue.trim()}>

@@ -1,19 +1,19 @@
 "use client"
 
+import type { ADSRParams, EQParams, FXParams } from "@/lib/audio-engine"
+import { DEFAULT_FX_PARAMS } from "@/lib/audio-engine"
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import type * as Tone from "tone"
 import { Knob } from "./knob"
-import { DEFAULT_FX_PARAMS } from "@/lib/audio-engine"
-import type { ADSRParams, EQParams, FXParams } from "@/lib/audio-engine"
 
 const EditorContainer = styled.div`
   background: linear-gradient(145deg, #c8c0b0, #b0a898);
   border: 3px solid #8a826e;
   border-radius: 8px;
   padding: 16px;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 6px rgba(255, 255, 255, 0.3),
     inset 0 -2px 8px rgba(0, 0, 0, 0.4),
     0 4px 12px rgba(0, 0, 0, 0.5),
@@ -23,7 +23,7 @@ const EditorContainer = styled.div`
   flex-direction: column;
   gap: 12px;
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -31,14 +31,14 @@ const EditorContainer = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
+    background:
       linear-gradient(45deg, transparent 48%, rgba(0,0,0,0.02) 50%, transparent 52%),
       linear-gradient(-45deg, transparent 48%, rgba(0,0,0,0.02) 50%, transparent 52%);
     background-size: 3px 3px;
     pointer-events: none;
     border-radius: 8px;
   }
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -89,7 +89,7 @@ const Tab = styled.button<{ $active: boolean }>`
     background: ${(props) =>
       props.$active ? "linear-gradient(145deg, #f5edd5, #ddd5bd)" : "linear-gradient(145deg, #555, #444)"};
   }
-  
+
   &:active {
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
     transform: translateY(1px);
@@ -128,7 +128,7 @@ const PadSelectorButton = styled.button<{ $open: boolean }>`
   &:hover {
     background: linear-gradient(145deg, #f5edd5, #ddd5bd);
   }
-  
+
   &:active {
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
     transform: translateY(1px);
@@ -152,7 +152,7 @@ const PadDropdown = styled.div<{ $open: boolean }>`
   background: linear-gradient(145deg, #f0e8d0, #d8d0b8);
   border: 2px solid #c8c0b0;
   border-radius: 4px;
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   min-width: 180px;
@@ -206,6 +206,8 @@ const ContentArea = styled.div`
   display: flex;
   gap: 12px;
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
 `
 
 const WaveformSection = styled.div`
@@ -222,7 +224,7 @@ const WaveformCanvas = styled.canvas`
   border-radius: 4px;
   cursor: crosshair;
   border: 3px solid #1a3a5a;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
     inset 0 0 20px rgba(10, 40, 80, 0.3),
     0 2px 4px rgba(0, 0, 0, 0.3);
@@ -234,7 +236,7 @@ const EQEnvelopeCanvas = styled.canvas`
   background: #0a1a2a;
   border-radius: 4px;
   border: 3px solid #1a3a5a;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
     inset 0 0 20px rgba(10, 40, 80, 0.3),
     0 2px 4px rgba(0, 0, 0, 0.3);
@@ -249,7 +251,7 @@ const KnobsContainer = styled.div`
   background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
   border-radius: 4px;
   border: 2px solid #1a1a1a;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.4),
     0 2px 4px rgba(0, 0, 0, 0.2);
 `
@@ -280,7 +282,7 @@ const Slider = styled.input`
   background: #0a1a2a;
   border-radius: 2px;
   outline: none;
-  
+
   &::-webkit-slider-thumb {
     appearance: none;
     width: 12px;
@@ -302,13 +304,14 @@ const Slider = styled.input`
 
 const VerticalSlider = styled.input`
   writing-mode: bt-lr;
+  appearance: slider-vertical;
   -webkit-appearance: slider-vertical;
   width: 8px;
   height: 200px;
   background: #0a1a2a;
   border-radius: 4px;
   outline: none;
-  
+
   &::-webkit-slider-thumb {
     appearance: none;
     width: 16px;
@@ -337,7 +340,7 @@ const VolumeControl = styled.div`
   background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
   border-radius: 4px;
   border: 2px solid #1a1a1a;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.4),
     0 2px 4px rgba(0, 0, 0, 0.2);
 `
@@ -351,17 +354,7 @@ const ValueDisplay = styled.span`
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 `
 
-const StartEndControls = styled.div`
-  display: flex;
-  gap: 16px;
-  padding: 12px;
-  background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-  border-radius: 4px;
-  border: 2px solid #1a1a1a;
-  box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.4),
-    0 2px 4px rgba(0, 0, 0, 0.2);
-`
+
 
 const EQContainer = styled.div`
   display: flex;
@@ -378,7 +371,7 @@ const EQKnobsRow = styled.div`
   background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
   border-radius: 4px;
   border: 2px solid #1a1a1a;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.4),
     0 2px 4px rgba(0, 0, 0, 0.2);
 `
@@ -388,10 +381,11 @@ const FXContainer = styled.div`
   flex-direction: column;
   gap: 12px;
   flex: 1;
-  max-height: 100%;
-  overflow-y: scroll;
+  max-height: calc(100% - 20px);
+  overflow-y: auto;
   overflow-x: hidden;
   padding-right: 8px;
+  min-height: 0;
 
   &::-webkit-scrollbar {
     width: 10px;
@@ -423,7 +417,7 @@ const FXSection = styled.div`
   background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
   border-radius: 4px;
   border: 2px solid #1a1a1a;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.4),
     0 2px 4px rgba(0, 0, 0, 0.2);
 `
@@ -455,11 +449,11 @@ const FXSelect = styled.select`
   font-size: 11px;
   cursor: pointer;
   outline: none;
-  
+
   &:hover {
     border-color: #d4af37;
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -851,56 +845,52 @@ export function WaveformEditor({
           <WaveformSection>
             <WaveformCanvas ref={canvasRef} width={600} height={180} />
 
-            <StartEndControls>
-              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <Knob
-                  label="Pitch"
-                  value={pitch}
-                  min={-12}
-                  max={12}
-                  step={1}
-                  onChange={handlePitchChange}
-                  disabled={selectedPad === null}
-                  unit="st"
-                />
-                
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px" }}>
-                  <ControlGroup>
-                    <ControlLabel>Start</ControlLabel>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                      <Slider
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        value={startPoint}
-                        onChange={handleStartChange}
-                        disabled={selectedPad === null}
-                      />
-                      <ValueDisplay>{startPoint.toFixed(1)}%</ValueDisplay>
-                    </div>
-                  </ControlGroup>
-
-                  <ControlGroup>
-                    <ControlLabel>End</ControlLabel>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                      <Slider
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        value={endPoint}
-                        onChange={handleEndChange}
-                        disabled={selectedPad === null}
-                      />
-                      <ValueDisplay>{endPoint.toFixed(1)}%</ValueDisplay>
-                    </div>
-                  </ControlGroup>
-                </div>
-              </div>
-            </StartEndControls>
-
             <KnobsContainer>
+              <Knob
+                label="Pitch"
+                value={pitch}
+                min={-12}
+                max={12}
+                step={1}
+                onChange={handlePitchChange}
+                disabled={selectedPad === null}
+                unit="st"
+              />
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: "150px" }}>
+                <ControlGroup>
+                  <ControlLabel>Start</ControlLabel>
+                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                    <Slider
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={startPoint}
+                      onChange={handleStartChange}
+                      disabled={selectedPad === null}
+                      style={{ width: "80px" }}
+                    />
+                    <ValueDisplay style={{ fontSize: "9px", minWidth: "35px" }}>{startPoint.toFixed(1)}%</ValueDisplay>
+                  </div>
+                </ControlGroup>
+
+                <ControlGroup>
+                  <ControlLabel>End</ControlLabel>
+                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                    <Slider
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={endPoint}
+                      onChange={handleEndChange}
+                      disabled={selectedPad === null}
+                      style={{ width: "80px" }}
+                    />
+                    <ValueDisplay style={{ fontSize: "9px", minWidth: "35px" }}>{endPoint.toFixed(1)}%</ValueDisplay>
+                  </div>
+                </ControlGroup>
+              </div>
               <Knob
                 label="Attack"
                 value={adsr.attack}
@@ -1075,7 +1065,7 @@ export function WaveformEditor({
                 <FXSelectContainer>
                   <ControlLabel>Timing</ControlLabel>
                   <FXSelect
-                    value={fxParams.delayTime}
+                    value={fxParams.delayTime as string}
                     onChange={(e) => {
                       const value = e.target.value as FXParams["delayTime"]
                       setFxParams((prev) => ({
@@ -1209,7 +1199,6 @@ export function WaveformEditor({
           <ControlLabel>Vol</ControlLabel>
           <VerticalSlider
             type="range"
-            orient="vertical"
             min="-24"
             max="12"
             step="0.5"

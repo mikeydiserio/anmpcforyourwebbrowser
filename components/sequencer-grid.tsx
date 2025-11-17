@@ -66,12 +66,12 @@ const PatternContainer = styled.div`
   padding: 12px;
   border-radius: 4px;
   border: 3px solid #8a826e;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 6px rgba(255, 255, 255, 0.3),
     inset 0 -2px 8px rgba(0, 0, 0, 0.4),
     0 4px 12px rgba(0, 0, 0, 0.5);
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -79,7 +79,7 @@ const PatternContainer = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
+    background:
       linear-gradient(45deg, transparent 48%, rgba(0,0,0,0.02) 50%, transparent 52%),
       linear-gradient(-45deg, transparent 48%, rgba(0,0,0,0.02) 50%, transparent 52%);
     background-size: 3px 3px;
@@ -100,7 +100,7 @@ const GridHeaderContent = styled.div`
   font-size: 11px;
   position: relative;
   z-index: 1;
-  
+
   select {
     background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
     color: #d4af37;
@@ -110,7 +110,7 @@ const GridHeaderContent = styled.div`
     font-size: 11px;
     cursor: pointer;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-    
+
     &:hover {
       background: linear-gradient(145deg, #555, #444);
     }
@@ -127,7 +127,7 @@ const SwingContainer = styled.div`
   border: 2px solid #1a1a1a;
   border-radius: 4px;
   min-width: 100px;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.4),
     0 2px 4px rgba(0, 0, 0, 0.2);
 `
@@ -159,7 +159,7 @@ const CopyButton = styled.button`
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.1s;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 4px rgba(0,0,0,0.2),
     0 2px 4px rgba(0,0,0,0.3);
   white-space: nowrap;
@@ -272,13 +272,13 @@ export const SequencerGrid: React.FC<SequencerGridProps> = ({
             <SwingContainer>
               <SwingLabel>Swing</SwingLabel>
               <SwingValue>{swing}%</SwingValue>
-              <input 
-                type="range" 
-                min="50" 
-                max="75" 
+              <input
+                type="range"
+                min="50"
+                max="75"
                 step="1"
-                value={swing} 
-                onChange={(e) => onSwingChange(Number(e.target.value))} 
+                value={swing}
+                onChange={(e) => onSwingChange(Number(e.target.value))}
               />
             </SwingContainer>
           </GridHeaderContent>
